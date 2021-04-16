@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysDictDataMapper">
+
+    <select id="getSysDictDataPage" resultType="com.jvfast.module.sys.model.vo.SysDictDataQueryVo">
+        SELECT
+        id, dict_type_id, dict_label,dict_value,dict_order, status, remark, version, create_time, create_by,
+        update_time, update_by
+        FROM
+        sys_dict_data
+        <where>
+            <if test="query.dictTypeId!=null">
+                AND dict_type_id = #{query.dictTypeId,jdbcType=BIGINT}
+            </if>
+        </where>
+        ORDER BY dict_order
+    </select>
+
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+</mapper>

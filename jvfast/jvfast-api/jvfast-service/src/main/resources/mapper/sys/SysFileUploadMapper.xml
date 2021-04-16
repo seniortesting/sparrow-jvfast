@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysFileUploadMapper">
+
+    <select id="getSysFileUploadPage" resultType="com.jvfast.module.sys.model.vo.SysFileUploadQueryVo">
+        SELECT
+        id, user_id, token, url, original_name, file_name, file_path, last_batch_status, last_batch_time, status,
+        version, create_time, create_by, update_time, update_by
+        FROM
+        sys_file_upload
+        <where>
+            status=1
+            <if test="query.keyword!=null and query.keyword!=''">
+                <bind name="pattern" value="'%' + query.keyword + '%'"/>
+                AND name LIKE #{pattern}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+</mapper>

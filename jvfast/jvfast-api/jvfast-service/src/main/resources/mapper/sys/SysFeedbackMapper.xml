@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysFeedbackMapper">
+
+    <select id="pageSysFeedback" resultType="com.jvfast.module.sys.model.vo.SysFeedbackQueryVo">
+        SELECT
+        sf.version,
+        sf.update_time,
+        sf.feedback_type,
+        sf.name,
+        sf.email,
+        sf.id,
+        su.user_name,
+        sf.feedback_status,
+        sf.title,
+        sf.detail,
+        sf.screenshot,
+        sf.reason
+        FROM
+        sys_feedback sf
+        INNER JOIN sys_user su ON su.id = sf.user_id
+        <where>
+            sf.status=1
+            <if test="query.userName!=null and query.userName!=''">
+                <bind name="userName" value="'%' + query.userName + '%'"/>
+                AND su.user_name LIKE #{userName}
+            </if>
+            <if test="query.detail!=null and query.detail!=''">
+                <bind name="pattern" value="'%' + query.detail + '%'"/>
+                AND sf.detail LIKE #{pattern}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+
+</mapper>

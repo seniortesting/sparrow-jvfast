@@ -1,0 +1,133 @@
+## configure port and context path
+logging:
+  level:
+    root: info
+# -----------------------------sql sharding-------------------------------------------------
+spring:
+  pid:
+    file: '/var/run/@project.name@.pid'
+  shardingsphere:
+    datasource:
+      names: ds0master,ds0slave0
+      ds0master:
+        jdbc-url: jdbc:mysql://127.0.0.1:3306/jvfast?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+        username: ENC(MOJAVmMYz5sp3pl1b7b6qGzu/wC9MzNA)
+        password: ENC(naAtUM7Ck1WvuXqt+c+eU1Md5amr0wk1)
+      ds0slave0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://172.16.51.174:3306/jvfast?useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+        username: ENC(QaT42I+rUhmYZDxJkMTBoDkqkcv9YKzL)
+        password: ENC(ofeZqhtL77n3A4n3gaJfzbgpMxrsKZwJ)
+        # hikari configuration
+        pool-name: '@build.finalName@Pool'
+        maximum-pool-size: 3
+        read-only: false
+        auto-commit: true
+        ## 设置连接超时间： The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+        connection-timeout: 89000
+        max-lifetime: 80000
+        # 推荐的提供mysql的性能配置： https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+    # 分库分表
+    sharding:
+      # 读写分离
+      master-slave-rules:
+        ds0:
+          master-data-source-name: ds0master
+          slave-data-source-names: ds0slave0
+      # 不分库分表的数据源指定
+      default-data-source-name: ds0
+      # 分表
+  #      tables:
+  #        # 对用户表进行分表
+  #        sys_user:
+  #          actual-data-nodes: ds0.sys_user${0..1}
+  #          table-strategy:
+  #            inline:
+  #              sharding-column: id
+  #              algorithm-expression: sys_user${id % 3}
+  #          key-generator:
+  #            column: id
+  #            type: SNOWFLAKE
+  # redis 配置
+  redis:
+    host: 172.16.51.174
+    port: 6379
+    database: 9
+    password: ENC(rKUjfJSsHOXP94RSjB4QyGrMnMLcK5hLY7v8wAvpHPc0fZrqW6BO84TXPrGJ2LvN)
+    ssl: false
+# -----------------------------Redis-------------------------------------------------.
+# jvfast settings
+jvfast:
+  demo-enabled: true
+  # encrypt
+  encrypt:
+    enabled: false
+    secret-key: b2c17b46e2b13s5392aab5a82869856c
+  # jwt
+  shiro:
+    jwt:
+      secret-key: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+  # 微信配置
+  wx:
+    mp:
+      configs:
+        # gmail邮箱账号
+        - name: 胡萝卜网
+          appId: wx408a9a0cbefabc91
+          secret: 646174fda48d93504ca9423a032a26fd
+          token: zxtest2gbyb45o0a1al
+          aesKey: XGgHD4KN28p9QEigVYIDCM56UmPpxHe9rA6FMmzjFtM
+    miniapp:
+      configs:
+        - appId: ""
+          secret: ""
+          token: ""
+          aesKey: ""
+          msgDataFormat: JSON
+    open:
+      appId: ""
+      secret: ""
+      token: ""
+      aesKey: ""
+    pay:
+      #微信公众号或者小程序等的appid
+      appId: ""
+      #微信支付商户号
+      mchId: ""
+      #微信支付商户密钥
+      mchKey: ""
+      #服务商模式下的子商户公众账号ID
+      subAppId: ""
+      #服务商模式下的子商户号
+      subMchId: ""
+      # p12证书的位置，可以指定绝对路径，也可以指定类路径（以classpath:开头）
+      keyPath: ""
+  # oss存储配置
+  oss:
+    type: aliyun
+    aliyun:
+      endpoint: oss-cn-hangzhou.aliyuncs.com
+      access-key-id: ENC(hjktw3GR28leOinLKcNFi5OfgAmEz4pb6efu36n1AlHg/ND7zoHtyA==)
+      access-key-secret: ENC(VP6ocWzc6z2MrmThSQfKB88JjgQyKBqKUP52nZ7kXIJWMniO6CY9ag==)
+      bucket-name: yanzhi-bucket
+      domain: https://res.yitieyilu.com
+      prefix: test
+  # 短信服务配置
+  sms:
+    type: aliyun
+    aliyun:
+      access-key-id: ENC(K9q0P2HLvCisrgSSlEZzj2HUYyKrLpnQ8h0O9b5artS2ljGWDQNY5A==)
+      access-key-secret: ENC(hIYA17G9uVZNpG9rGLTzhHLqlk27DArOGH+3qknig+RWXo4p536g1A==)
+      sign-name: 眼值科技

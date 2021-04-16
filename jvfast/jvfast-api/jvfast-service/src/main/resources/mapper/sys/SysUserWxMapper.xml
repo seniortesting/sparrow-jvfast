@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysUserWxMapper">
+
+    <select id="pageSysUserWx" resultType="com.jvfast.module.sys.model.vo.SysUserWxQueryVo">
+        SELECT
+                status,
+                remark,
+                version,
+                create_time,
+                create_by,
+                update_time,
+                update_by,
+                id, user_id, open_id, nickname, sexDesc, sex, lang, city, province, country, headImgUrl, subscribeTime, subscribeScene, unionId
+        FROM
+        sys_user_wx
+        <where>
+            status=1
+            <if test="query.keyword!=null and query.keyword!=''">
+                <bind name="pattern" value="'%' + query.keyword + '%'"/>
+                AND name LIKE #{pattern}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+
+</mapper>

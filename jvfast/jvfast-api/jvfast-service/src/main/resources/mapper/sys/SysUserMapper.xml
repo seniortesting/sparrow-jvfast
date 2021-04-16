@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysUserMapper">
+
+    <select id="getSysUserPage" resultType="com.jvfast.module.sys.model.dto.SysUserDeptDTO">
+        SELECT
+        su.id, su.user_name, su.nick_name, su.phone, su.sex, su.birth, su.avatar, su.email, su.signature, su.address,
+        su.wx_openid,
+        su.status, su.version, su.create_time, su.create_by, su.update_time, su.update_by,sd.id AS 'deptId',
+        sd.dept_name
+        FROM
+        sys_user su
+        LEFT JOIN sys_user_dept sud ON su.id=sud.user_id
+        LEFT JOIN sys_dept sd ON sd.id=sud.dept_id
+        <where>
+            <if test="query.keyword!=null and query.keyword!=''">
+                <bind name="pattern" value="'%' + query.keyword + '%'"/>
+                AND su.user_name LIKE #{pattern}
+            </if>
+            <if test="query.userName!=null and query.userName!=''">
+                AND su.user_name= #{query.userName,jdbcType=VARCHAR}
+            </if>
+            <if test="query.phone!=null and query.phone!=''">
+                AND su.phone= #{query.phone,jdbcType=VARCHAR}
+            </if>
+            <if test="query.email!=null and query.email!=''">
+                AND su.email= #{query.email,jdbcType=VARCHAR}
+            </if>
+            <if test="deptIds!=null">
+                AND sd.id IN
+                <foreach collection="deptIds" item="item" open="(" close=")" separator=",">
+                    #{item,jdbcType=BIGINT}
+                </foreach>
+
+            </if>
+        </where>
+        ORDER BY su.id DESC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+    <select id="getSysUserById" resultType="com.jvfast.module.sys.model.dto.SysUserDeptDTO">
+        SELECT
+        su.id, su.user_name, su.nick_name, su.phone, su.sex, su.birth, su.avatar, su.email, su.signature, su.address,
+        su.wx_openid,
+        su.status, su.version, su.create_time, su.create_by, su.update_time, su.update_by,sd.id AS 'deptId',
+        sd.dept_name
+        FROM
+        sys_user su
+        LEFT JOIN sys_user_dept sud ON su.id=sud.user_id
+        LEFT JOIN sys_dept sd ON sd.id=sud.dept_id
+        <where>
+            <if test="query.id!=null and query.id!=''">
+                AND su.id =#{query.id,jdbcType=BIGINT}
+            </if>
+        </where>
+        ORDER BY su.update_time DESC
+    </select>
+    <select id="getSysUserRoleByUserId" resultType="com.jvfast.module.sys.model.dto.SysUserRoleDTO">
+        SELECT su.id,
+               sr.id AS 'roleId',
+               sr.role_name,
+               sr.role_code
+        FROM sys_user su
+                 LEFT JOIN sys_user_role sur ON su.id = sur.user_id
+                 LEFT JOIN sys_role sr ON sr.id = sur.role_id
+        WHERE su.id = #{query.id,jdbcType=BIGINT}
+    </select>
+</mapper>

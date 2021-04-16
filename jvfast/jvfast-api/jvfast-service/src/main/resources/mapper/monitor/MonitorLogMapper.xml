@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.monitor.mapper.MonitorLogMapper">
+
+    <select id="getMonitorLogPage" resultType="com.jvfast.module.monitor.model.vo.MonitorLogQueryVo">
+        SELECT
+        ml.id, ml.business_type,
+        ml.operation_type, ml.business_title,
+        ml.method, ml.request_url,
+        ml.request_method, ml.request_param,
+        ml.request_status, ml.request_result,
+        ml.request_error_msg, ml.request_time,
+        ml.request_ip, ml.update_time ,
+        su.user_name
+        FROM
+        monitor_log ml
+        LEFT JOIN sys_user su ON su.id= ml.update_by
+        <where>
+            <if test="query.operationType!=null">
+                AND ml.operation_type = #{query.operationType,jdbcType=INTEGER}
+            </if>
+            <if test="query.hasError!=null and query.hasError.equals(true)">
+                AND ml.status = 0
+            </if>
+        </where>
+        ORDER BY ml.update_time DESC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+
+</mapper>

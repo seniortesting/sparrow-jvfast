@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jvfast</groupId>
+        <artifactId>jvfast-api</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <packaging>jar</packaging>
+
+    <artifactId>jvfast-social</artifactId>
+    <name>jvfast-social模块</name>
+    <version>${revision}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!--**********************************************************start social lib**********************************************************-->
+        <dependency>
+            <groupId>com.xkcoding.justauth</groupId>
+            <artifactId>justauth-spring-boot-starter</artifactId>
+            <version>${justauth-spring-boot.version}</version>
+            <exclusions>
+               <!-- hutool版本太低问题-->
+                <exclusion>
+                    <groupId>cn.hutool</groupId>
+                    <artifactId>hutool-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

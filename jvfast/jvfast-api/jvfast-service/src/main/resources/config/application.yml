@@ -1,0 +1,317 @@
+# --------------------------------------------------------------------------------------------
+# spring settings
+spring:
+  profiles:
+    active: '@profileActive@'
+  application:
+    name: '@project.name@'
+    version: '@project.version@'
+  banner:
+    charset: utf-8
+    location: classpath:config/banner.txt
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: console
+  # mvc configuration
+  mvc:
+    throw-exception-if-no-handler-found: true
+    async:
+      request-timeout: 20000
+  # upload file
+  servlet:
+    multipart:
+      enabled: true
+      # 单个文件最大
+      max-file-size: 1024MB
+      # 设置总上传数据总大小
+      max-request-size: 1024MB
+      resolve-lazily: true
+  messages:
+    encoding: UTF-8
+  jackson:
+    date-format: yyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # one tomcat for multiply war package
+  # : Unable to register MBean [HikariDataSource (null)] with key 'dataSource';
+  # nested handler is javax.management.InstanceAlreadyExistsException:
+  jmx:
+    enabled: true
+    default-domain: '@groupId@.@artifactId@'
+  jdbc:
+    template:
+      fetch-size: -1
+      max-rows: -1
+  # async task
+  task:
+    execution:
+      thread-name-prefix: 'AsyncTask-'
+      pool:
+        allow-core-thread-timeout: false
+        core-size: 8
+        keep-alive: 60s
+        max-size: 80
+        queue-capacity: 20
+    scheduling:
+      pool:
+        size: 8
+      thread-name-prefix: 'AsyncScheduler-'
+  # 定时任务配置相关信息
+  quartz:
+    scheduler-name: BatchScheduler
+    auto-startup: true
+    startup-delay: 5s
+    wait-for-jobs-to-complete-on-shutdown: true
+    overwrite-existing-jobs: false
+    # 任务类型
+    job-store-type: jdbc
+    # 初始化数据库表,只用于第一次配置
+    jdbc:
+      comment-prefix: --
+      initialize-schema: never
+      schema: classpath:schema_quartz_mysql_innodb.sql
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: BatchSchedulerInstance
+            instanceId: AUTO
+          jobStore:
+            useProperties: true
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            # 调度引擎比较忙得时候出现这个问题
+            # 当前线程有10个，但是现在有12个任务需要在13:00处理，所以有两个任务需要延迟处理，
+            # 如果延迟到13:60，就是延迟了60分钟， 大于下面的50分钟，所以就是misfire的。
+            # 如果延迟到13:40 ，触发器发现小于50秒，调度引擎认为这个延迟时间可以忍受，所以不算超时(Misfires)
+            misfireThreshold: 50000
+            # 集群配置
+            isClustered: false
+            clusterCheckinInterval: 50000
+          # 线程池相关配置
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            # 并发个数, 线程池的线程数，即最多3个任务同时跑
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+  # 发送邮件smtp服务器
+  mail:
+    default-encoding: utf-8
+    test-connection: false
+    # 发送邮件的服务器，参考： https://help.aliyun.com/knowledge_detail/36576.html?spm=a2c4g.11186631.2.3.433744fdFk5ywM
+    protocol: smtp
+    host: smtp.yitieyilu.com
+    # ssl: 465 ,or 25
+    port: 465
+    username: contact@yitieyilu.com
+    password: ENC(y2ZeKedRLWx/Q+KAy0qSHbZIxnxmqZBl)
+    properties:
+      mail:
+        smtp:
+          from: contact@yitieyilu.com
+          # 邮件发送人别名
+          from-personal: 眼值信息科技服务中心
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          starttls:
+            enable: true
+            required: true
+    # 此处发送邮件采用freemarker,实验证明freemarker渲染模板速度大于thymelefa
+  freemarker:
+    enabled: true
+    template-loader-path: classpath:/templates/
+    suffix: .ftl
+    cache: false
+    charset: UTF-8
+    content-type: text/html
+    allow-request-override: true
+    check-template-location: true
+    expose-request-attributes: true
+    expose-session-attributes: true
+    expose-spring-macro-helpers: true
+
+  ## ------------------database connection
+  shardingsphere:
+    datasource:
+      ds0master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        # hikari configuration
+        pool-name: '@build.finalName@Pool'
+        maximum-pool-size: 3
+        read-only: false
+        auto-commit: true
+        # 设置客户端与连接池的连接超时间，网络比较慢时与连接池超过这个时间就会被断开，
+        # 不是数据库，单位毫秒
+        connection-timeout: 89000
+        # 设置连接池与数据库连接超时时间：
+        # 推荐设置：https://stackoverflow.com/questions/28180562/hikaricp-and-maxlifetime/47694402
+        #  1. to set maxLifeTime value to be at least 30000ms.
+        #  2. to set maxLifeTime value few minute less than mysql's wait_timeout(show variables like "%timeout%") to avoid broken connection handler.
+        #  默认设置是1800000 (30 minutes)，单位毫秒
+        max-lifetime: 80000
+        # 推荐的提供mysql的性能配置： https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+    # config for read and write ---- slave and master
+    sharding:
+      master-slave-rules:
+        ds0:
+          load-balance-algorithm-type: ROUND_ROBIN
+    props:
+      executor:
+        size: 16
+      sql:
+        show: true
+  # cache settings
+  cache:
+    type: redis
+    redis:
+      time-to-live: 180000
+      key-prefix: '@build.finalName@:'
+  redis:
+    lettuce:
+      pool:
+        max-active: 200
+        max-idle: 8
+        max-wait: 10s
+        min-idle: 2
+      shutdown-timeout: 3s
+############################## Spring boot admin start ##############################
+
+############################## Spring boot admin end ###############################
+## configure port and context path
+server:
+  port: 9999
+  http2:
+    enabled: true
+  servlet:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+    context-path: '/@project.artifactId@/'
+  # 返回结果压缩
+  compression:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: false
+    include-exception: true
+    include-stacktrace: on_trace_param
+  # Tomcat settings
+  tomcat:
+    uri-encoding: UTF-8
+    max-connections: 10000
+    accept-count: 1000
+    max-swallow-size: 200MB
+    max-http-form-post-size: 200MB
+    threads:
+      max: 200
+      min-spare: 30
+
+# logging
+logging:
+  config: classpath:config/logback.xml
+  file:
+    path: /logs/@artifactId@
+# mybatis相关配置
+mybatis-plus:
+  #  configLocation
+  mapper-locations: classpath*:mapper/**/*.xml
+  check-config-location: false
+  # 该执行器类型会复用预处理语句（PreparedStatement）
+  executor-type: reuse
+  # 以下的是原生的mybatis的配置信息
+  configuration:
+    # 列名驼峰转换
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    aggressive-lazy-loading: true
+    auto-mapping-unknown-column-behavior: warning
+    default-enum-type-handler: com.baomidou.mybatisplus.extension.handlers.MybatisEnumTypeHandler
+    # 全局配置
+  global-config:
+    banner: false
+    # 最大值是31
+    db-config:
+      db-type: mysql
+      id-type: assign_id
+      table-underline: true
+      capital-mode: false
+      # 生成的wrap中判断对应的字段策略
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      insert-strategy: not_null
+      update-strategy: not_null
+      select-strategy: not_empty
+# encryptor
+jasypt:
+  encryptor:
+    password: 3a75be5a
+
+# -----------------------------jvfast通用配置-------------------------------------------------.
+jvfast:
+  store-path: /files/
+  resource-patterns: /files/
+  # swagger
+  swagger:
+    title: '@artifactId@'
+    version: '@project.version@'
+    description: '@project.description@'
+    contact:
+      name: '@project.organization.name@'
+    test-token: eyJjdHkiOiJjdHkiLCJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIxMTk2NzY1OTc5ODIyMDMwODUwIiwiZXhwIjoxNTc3MTA4ODg2LCJpYXQiOjE1NzU4MTI4ODYsImp0aSI6ImY5MzFlOTY1NjBhYzQ1NzI4MjQ0YjA2NGIxZThmMjI0In0.wNzc_9gXJKsUOg5ruC5HGqae9_35dX2qvcz-R_VNqOI
+  captcha:
+    enabled: true
+    expired-seconds: 900
+    height: 50
+    width: 200
+  qrcode:
+    height: 300
+    width: 300
+  # jwt
+  shiro:
+    enable: true
+    jwt:
+      enabled: true
+      issuer: JVFast
+      subject: JVFast Token
+      audience: jwt
+      token-header: X-Token
+      # 15天
+      expired-hours: 360
+      # 5天前刷新
+      refresh-count-down-hours: 120
+    # 权限配置
+    filter-chain-definitions: /,/favicon.ico,/static/**,/templates/**
+    permission:
+      # 排除下载文件资源
+      - urls: ${jvfast.resource-patterns}**
+        permission: anon
+      # 排除Swagger资源
+      - urls: /doc.html,/webjars/**,/swagger-resources/**,/v2/api-docs/**,/v2/api-docs-ext/**,/js/**
+        permission: anon
+      # 排除用户登录，注册，忘记密码
+      - urls: /sys/user/login,/sys/user/mlogin,/sys/user/reg,/sys/user/mreg,/sys/user/verify,/sys/user/forgetpwd/**,/sys/user/update,/sys/user/logout, /sys/user/id
+        permission: anon
+      # 排除验证码,聊天
+      - urls: /sys/captcha/**,/socket/socket/**,/sys/sms/**
+        permission: anon
+      # 微信相关服务
+      - urls: /wx/**, /sys/wx/openid,/sys/wx/binding,/sys/wx/status
+        permission: anon

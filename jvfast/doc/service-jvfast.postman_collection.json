@@ -1,0 +1,10 @@
+{
+	"info": {
+		"_postman_id": "3a9e6346-6b00-4943-8bb1-e69d919ca1fe",
+		"name": "service-pingbook",
+		"description": "api interfaces",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [],
+	"protocolProfileBehavior": {}
+}

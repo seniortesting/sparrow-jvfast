@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.ignore.mapper.PornMaomiMapper">
+
+
+    <select id="pagePornMaomi" resultType="com.jvfast.module.ignore.model.vo.PornMaomiQueryVo">
+        SELECT
+        pm.id,
+        pm.page_id,
+        pm.img,
+        pm.title,
+        pm.category,
+        pm.url,
+        pm.page_url,
+        pm.porn_date,
+        pm.like_num,
+        pm.version,
+        pm.update_time
+        FROM
+        porn_maomi pm
+        <where>
+            <if test="query.category!=null and query.category!=''">
+                AND pm.category=#{param2.category,jdbcType=VARCHAR}
+            </if>
+        </where>
+        ORDER BY pm.porn_date DESC
+    </select>
+
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+    <update id="likePorn" parameterType="com.jvfast.common.param.IdParam">
+        UPDATE porn_maomi SET like_num=like_num +1 WHERE id=#{like.id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

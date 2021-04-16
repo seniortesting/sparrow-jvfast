@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.jvfast.notification.mail.config.MailConfig,\
+  com.jvfast.notification.sms.config.SmsConfig,\
+  com.jvfast.notification.wx.config.WxConfig
+

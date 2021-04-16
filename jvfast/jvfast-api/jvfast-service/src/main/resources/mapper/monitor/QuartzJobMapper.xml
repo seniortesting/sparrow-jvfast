@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.monitor.mapper.ScheduleJobMapper">
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+    <select id="getJobs" resultType="com.jvfast.module.monitor.model.vo.ScheduleJobVo">
+        SELECT
+        qjd.JOB_NAME AS 'jobName',
+        qjd.DESCRIPTION AS 'description',
+        qjd.JOB_CLASS_NAME AS 'jobClassName',
+        qjd.REQUESTS_RECOVERY as 'recovery',
+        qct.CRON_EXPRESSION AS 'cronExpression',
+        FROM_UNIXTIME(qt.NEXT_FIRE_TIME/1000) AS 'nextFire',
+        FROM_UNIXTIME(qt.START_TIME/1000) AS 'prevFire',
+        CASE qt.TRIGGER_STATE
+        WHEN 'WAITING' THEN '等待'
+        WHEN 'ACQUIRED' THEN '读取中'
+        WHEN 'EXECUTING' THEN '执行中'
+        WHEN 'COMPLETE' THEN '完成'
+        WHEN 'BLOCKED' THEN '阻塞'
+        WHEN 'ERROR' THEN '失败'
+        WHEN 'PAUSED'THEN '暂停'
+        WHEN 'PAUSED_BLOCKED' THEN '暂停阻塞'
+        WHEN 'DELETED' THEN '已删除'
+        END AS 'state',
+        qct.TIME_ZONE_ID AS 'timezonId'
+        FROM QRTZ_JOB_DETAILS qjd
+        LEFT JOIN QRTZ_TRIGGERS qt
+        ON qjd.JOB_NAME = qt.JOB_NAME
+        LEFT JOIN QRTZ_CRON_TRIGGERS qct
+        ON qt.TRIGGER_NAME = qct.TRIGGER_NAME
+        AND qt.TRIGGER_GROUP = qct.TRIGGER_GROUP
+        <where>
+            <if test="query.jobName!=null and query.jobName!=''">
+                <bind name="pattern" value="'%' + query.jobName + '%'"/>
+                AND qjd.JOB_NAME LIKE #{pattern}
+            </if>
+        </where>
+    </select>
+</mapper>

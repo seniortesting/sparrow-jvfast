@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jvfast</groupId>
+        <artifactId>jvfast-api</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <packaging>jar</packaging>
+
+    <artifactId>jvfast-service</artifactId>
+    <name>jvfast-service服务</name>
+    <version>${revision}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-quartz</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-process</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-websocket</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-notification</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-weixin</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jvfast</groupId>
+            <artifactId>jvfast-oss</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!--**********************************************************Start database**********************************************************-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <!--jdbc sharding-->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
+            <version>${sharding-sphere.version}</version>
+        </dependency>
+        <!--   shardingsphere引入错误： javax.xml.bind.JAXBException: Provider com.sun.xml.internal.bind.v2.ContextFactory not found-->
+        <!--   因为Java EE API modules已经在java8之后的版本移除,以下的是为了兼容java11库-->
+        <!-- API, java.xml.bind module -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <!--**********************************************************end weixin **********************************************************-->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${jni.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>${jni.version}</version>
+        </dependency>
+        <!--        testing libraries-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <!-- https://docs.spring.io/spring-boot/docs/current/reference/html/using-boot-devtools.html -->
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--**********************************************************end security libraries**********************************************************-->
+    </dependencies>
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <!-- 排除资源文件配置-->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>assembly/**</exclude>
+                    <exclude>config/**</exclude>
+                    <exclude>bin/**</exclude>
+                </excludes>
+            </resource>
+            <!-- 过滤配置文件到config目录 -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>config/application.yml</include>
+                    <include>config/application-${profileActive}.yml</include>
+                    <include>config/banner.txt</include>
+                    <include>config/logback.xml</include>
+                    <include>mapper/**/*.xml</include>
+                    <include>static/**</include>
+                    <include>templates/**</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!--            跳过测试插件-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-dependency-plugin</artifactId>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>prepare-package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>copy-dependencies</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <outputDirectory>${project.build.directory}/lib</outputDirectory>-->
+            <!--                            <overWriteReleases>false</overWriteReleases>-->
+            <!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
+            <!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
+            <!--                            <includeScope>compile</includeScope>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
+            <!--     springboot打包插件-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-jar-plugin</artifactId>-->
+            <!--                <configuration>-->
+            <!--                    <excludes>-->
+            <!--                        <exclude>config/*.yml</exclude>-->
+            <!--                        <exclude>config/logback*.xml</exclude>-->
+            <!--                    </excludes>-->
+            <!--                    <archive>-->
+            <!--                        <manifest>-->
+            <!--                            <addClasspath>true</addClasspath>-->
+            <!--                            <classpathPrefix>../lib/</classpathPrefix>-->
+            <!--                        </manifest>-->
+            <!--                    </archive>-->
+            <!--                    <outputDirectory>${project.build.directory}</outputDirectory>-->
+            <!--                </configuration>-->
+            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork> <!-- 如果没有该配置，devtools不会生效 -->
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <!--                    <includeSystemScope>true</includeSystemScope>-->
+                    <!--                    <includes>-->
+                    <!--                        &lt;!&ndash; 项目启动jar包中排除依赖包,includes with not existing artifact &ndash;&gt;-->
+                    <!--                        <include>-->
+                    <!--                            <groupId>non-exists</groupId>-->
+                    <!--                            <artifactId>non-exists</artifactId>-->
+                    <!--                        </include>-->
+                    <!--                    </includes>-->
+                    <!--                    <layout>ZIP</layout>-->
+                    <!--                    <addResources>true</addResources>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 打包插件 -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                    <descriptors>
+                        <descriptor>src/main/resources/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

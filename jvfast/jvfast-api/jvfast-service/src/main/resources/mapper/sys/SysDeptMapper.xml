@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysDeptMapper">
+
+    <select id="getSysDeptPage" resultType="com.jvfast.module.sys.model.vo.SysDeptQueryVo">
+        SELECT
+        id, pid, dept_name, dept_order, status, remark, version, create_time, create_by, update_time, update_by
+        FROM
+        sys_dept
+        <where>
+            <if test="query.keyword!=null and query.keyword!=''">
+                <bind name="pattern" value="'%' + query.keyword + '%'"/>
+                AND name LIKE #{pattern}
+            </if>
+        </where>
+        ORDER BY dept_order ASC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+    <select id="getDeptTreeChildren" resultType="com.jvfast.module.sys.model.vo.SysDeptQueryVo">
+        WITH RECURSIVE dept_tree
+                           AS
+                           (SELECT sd.id,
+                                   sd.pid,
+                                   sd.dept_name,
+                                   sd.dept_order,
+                                   sd.status,
+                                   sd.version
+                            FROM sys_dept sd
+                            WHERE sd.id = #{id,jdbcType=BIGINT}
+                            UNION ALL
+                            SELECT sd.id,
+                                   sd.pid,
+                                   sd.dept_name,
+                                   sd.dept_order,
+                                   sd.status,
+                                   sd.version
+                            FROM sys_dept sd
+                                     INNER JOIN dept_tree dt
+                                                ON sd.pid = dt.id)
+        SELECT *
+        FROM dept_tree
+    </select>
+    <select id="getDeptTree" resultType="com.jvfast.module.sys.model.vo.SysDeptQueryVo">
+        SELECT sd.id,
+        sd.pid,
+        sd.dept_name,
+        sd.dept_order,
+        sd.status,
+        sd.version
+        FROM sys_dept sd
+        <where>
+            sd.status=1
+        </where>
+        ORDER BY sd.pid,sd.dept_order
+    </select>
+
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysMenuMapper">
+
+
+    <select id="pageSysMenu" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        SELECT sm.id,
+        sm.pid,
+        sm.menu_name,
+        sm.menu_order,
+        sm.menu_type,
+        sm.menu_icon,
+        sm.component_name,
+        sm.hidden,
+        sm.external,
+        sm.permission,
+        sm.remark,
+        sm.status
+        FROM sys_menu sm
+        WHERE sm.status = 1
+        <if test="query.menuName!=null and query.menuName!=''">
+            AND sm.menu_name = #{query.menuName,jdbcType=VARCHAR}
+        </if>
+        ORDER BY sm.pid, sm.menu_order
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+    <select id="listPermissionByRoleCodes" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        SELECT DISTINCT sm.id,
+        sm.pid,
+        sm.menu_name,
+        sm.component_name,
+        sm.hidden,
+        sm.permission,
+        sm.external,
+        sm.menu_type,
+        sm.menu_icon,
+        sm.menu_order,
+        sm.update_time,
+        sm.status
+        FROM sys_role sr
+        INNER JOIN sys_role_menu srm ON sr.id = srm.role_id
+        INNER JOIN sys_menu sm ON srm.menu_id = sm.id
+        WHERE sm.status = 1
+        AND sr.status = 1
+        AND srm.status = 1
+        <if test="roleCodes!=null and !roleCodes.isEmpty()">
+            AND sr.role_code IN
+            <foreach collection="roleCodes" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <!--    每次路由加载对应的用户请求的菜单列表-->
+    <select id="listRouterByUserId" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        SELECT DISTINCT m.id,
+        m.pid,
+        m.menu_name,
+        m.component_name,
+        m.hidden,
+        m.permission,
+        m.external,
+        m.menu_type,
+        m.menu_icon,
+        m.menu_order,
+        m.update_time,
+        m.status
+        FROM sys_menu m
+        <if test="userId!=null">
+            LEFT JOIN sys_role_menu rm ON m.id = rm.menu_id
+            LEFT join sys_user_role ur on rm.role_id = ur.role_id
+            LEFT join sys_role sr on ur.role_id = sr.id
+        </if>
+        WHERE m.status = 1 AND m.hidden = 0
+        <if test="userId!=null">
+            AND (ur.user_id=#{userId,jdbcType=VARCHAR} OR m.permission='')
+        </if>
+        ORDER BY m.pid, m.menu_order
+    </select>
+    <select id="listTopMenuByUserId" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        SELECT
+        DISTINCT
+        m.id, m.pid, m.menu_name, m.component_name, m.hidden, m.permission, m.external, m.menu_type,
+        m.menu_icon, m.menu_order, m.update_time, m.status
+        FROM sys_menu m
+        <if test="userId!=null">
+            LEFT JOIN sys_role_menu srm
+            ON m.id = srm.menu_id
+            LEFT JOIN sys_user_role sur
+            ON sur.role_id = srm.role_id
+        </if>
+        WHERE m.status = 1 AND m.hidden = 0
+        <if test="userId!=null">
+            AND (sur.user_id = #{userId,jdbcType=BIGINT} OR m.permission ='')
+        </if>
+        AND m.pid =0
+        ORDER BY m.pid, m.menu_order
+    </select>
+    <!--    角色管理中编辑/查看功能-->
+    <select id="listMenuByRoleId" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        SELECT sm.id,
+        sm.pid,
+        sm.menu_name,
+        sm.component_name,
+        sm.hidden,
+        sm.permission,
+        sm.external,
+        sm.menu_type,
+        sm.menu_icon,
+        sm.menu_order,
+        sm.update_time,
+        sm.status
+        FROM sys_menu sm
+        LEFT JOIN sys_role_menu srm ON srm.menu_id =sm.id
+        <where>
+            <if test="roleId!=null">
+                srm.role_id = #{roleId,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <!--    只用在删除/更新菜单功能-->
+    <select id="listMenuChildrenByMenuId" resultType="com.jvfast.module.sys.model.vo.SysMenuQueryVo">
+        WITH RECURSIVE menu_tree
+                           AS
+                           (SELECT m.id,
+                                   m.pid,
+                                   m.menu_name,
+                                   m.component_name,
+                                   m.hidden,
+                                   m.permission,
+                                   m.external,
+                                   m.menu_type,
+                                   m.menu_icon,
+                                   m.menu_order,
+                                   m.update_time,
+                                   m.status
+                            FROM sys_menu m
+                            WHERE id = #{id,jdbcType=BIGINT}
+                            UNION ALL
+                            SELECT m.id,
+                                   m.pid,
+                                   m.menu_name,
+                                   m.component_name,
+                                   m.hidden,
+                                   m.permission,
+                                   m.external,
+                                   m.menu_type,
+                                   m.menu_icon,
+                                   m.menu_order,
+                                   m.update_time,
+                                   m.status
+                            FROM sys_menu m
+                                     INNER JOIN menu_tree mt
+                                                ON m.pid = mt.id)
+        SELECT *
+        FROM menu_tree
+    </select>
+</mapper>

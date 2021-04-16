@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.monitor.mapper.MonitorLoginHistoryMapper">
+
+    <select id="getMonitorLoginHistoryPage" resultType="com.jvfast.module.monitor.model.vo.MonitorLoginHistoryQueryVo">
+        SELECT
+        status,
+        version,
+        create_time,
+        create_by,
+        update_time,
+        update_by,
+        id, user_name, ip_address, login_location, browser, os, login_status, login_message, login_time
+        FROM
+        monitor_login_history
+        <where>
+            status=1
+            <if test="query.keyword!=null and query.keyword!=''">
+                <bind name="pattern" value="'%' + query.keyword + '%'"/>
+                AND name LIKE #{pattern}
+            </if>
+        </where>
+        ORDER BY update_time DESC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+
+</mapper>

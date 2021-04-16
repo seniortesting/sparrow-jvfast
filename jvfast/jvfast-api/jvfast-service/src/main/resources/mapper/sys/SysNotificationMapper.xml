@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jvfast.module.sys.mapper.SysNotificationMapper">
+
+    <select id="pageSysNotification" resultType="com.jvfast.module.sys.model.vo.SysNotificationQueryVo">
+        SELECT
+        sn.id,
+        su.id AS 'userId',
+        su.user_name,
+        sn.notification_type,
+        sn.title,
+        sn.content,
+        sn.read_status,
+        sn.result_status,
+        sn.status,
+        sn.remark,
+        sn.update_time
+        FROM sys_notification sn
+        LEFT JOIN sys_user su ON su.id =sn.user_id
+        <where>
+            sn.status=1
+            <if test="query.type!=null">
+                AND (sn.notification_type=1 OR sn.notification_type=2)
+            </if>
+            <if test="query.userName!=null and query.userName!=''">
+                <bind name="pattern" value="'%' + query.userName + '%'"/>
+                AND su.user_name LIKE #{pattern}
+            </if>
+            <if test="query.userId!=null">
+                AND (sn.user_id = #{param2.userId,jdbcType=BIGINT} OR sn.user_id = 0 )
+            </if>
+            <if test="query.readStatus!=null">
+                AND sn.read_status=#{query.readStatus}
+            </if>
+        </where>
+        ORDER BY sn.id DESC
+    </select>
+    <!-- ***************************** 以下为扩展接口 ****************************************************** -->
+
+</mapper>
